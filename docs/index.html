@@ -756,7 +756,7 @@
             <a href="https://github.com/ludoplex/masm64-framework/discussions">Discussions</a>
             <a href="https://github.com/ludoplex/masm64-framework/blob/main/LICENSE">License</a>
         </div>
-        <p>MIT License. Built with Puter.js for analytics.</p>
+        <p>MIT License.</p>
     </footer>
     
     <div id="analytics-panel" class="analytics-panel">
@@ -908,21 +908,29 @@
                 });
             });
             
-            // Admin analytics view (press 'A' three times)
-            let keyPresses = [];
-            document.addEventListener('keydown', (e) => {
-                if (e.key.toLowerCase() === 'a') {
-                    keyPresses.push(Date.now());
-                    keyPresses = keyPresses.filter(t => Date.now() - t < 1000);
-                    if (keyPresses.length >= 3) {
-                        document.getElementById('analytics-panel').classList.toggle('visible');
-                        keyPresses = [];
+            // Admin analytics view - owner only via Puter.js auth
+            const OWNER_USERNAME = 'ludoplex';
+            let isOwner = false;
+            
+            async function checkOwnerAccess() {
+                try {
+                    if (typeof puter !== 'undefined' && puter.auth) {
+                        const user = await puter.auth.getUser();
+                        if (user && user.username === OWNER_USERNAME) {
+                            isOwner = true;
+                            document.getElementById('analytics-panel').classList.add('visible');
+                            console.log('%cOwner access granted', 'color: #3fb950;');
+                        }
                     }
+                } catch (e) {
+                    // Not authenticated or error - that's fine
                 }
-            });
+            }
+            
+            // Check on load
+            checkOwnerAccess();
             
             console.log('%cMASM64 Framework', 'font-size: 24px; font-weight: bold; color: #00d9ff;');
-            console.log('%cVisit: ' + analytics.visitId, 'color: #7b61ff;');
         })();
     </script>
 </body>
