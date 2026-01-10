@@ -27,22 +27,28 @@ To enable email reports, set the following secrets in your repository:
 
 ## SMTP Provider Options
 
+### Zoho Mail (Recommended)
+- Server: `smtp.zoho.com`
+- Port: `587` (TLS) or `465` (SSL)
+- Username: Your full Zoho email address
+- Password: Your Zoho password or App-Specific Password
+
+**Zoho Setup Steps:**
+1. Go to Zoho Mail > Settings > Security > App Passwords
+2. Generate an App-Specific Password for "GitHub Actions"
+3. Use that password as `SMTP_PASSWORD`
+
+| Secret | Zoho Value |
+|--------|------------|
+| `SMTP_SERVER` | `smtp.zoho.com` |
+| `SMTP_PORT` | `587` |
+| `SMTP_USERNAME` | `noreply@mightyhouseinc.com` |
+| `SMTP_PASSWORD` | Your app-specific password |
+
 ### Gmail (with App Password)
 - Server: `smtp.gmail.com`
 - Port: `587`
 - Requires 2FA enabled and App Password generated
-
-### SendGrid
-- Server: `smtp.sendgrid.net`
-- Port: `587`
-- Username: `apikey`
-- Password: Your SendGrid API key
-
-### Mailgun
-- Server: `smtp.mailgun.org`
-- Port: `587`
-- Username: Your Mailgun SMTP username
-- Password: Your Mailgun SMTP password
 
 ### Microsoft 365
 - Server: `smtp.office365.com`
