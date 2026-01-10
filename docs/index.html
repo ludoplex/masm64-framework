@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MASM64 Framework - Modern x64 Assembly Development</title>
+    <meta name="description" content="A comprehensive, production-ready MASM64 development framework for x64 Windows assembly programming.">
+    
+    <!-- Puter.js SDK -->
+    <script src="https://js.puter.com/v2/"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #0a0e14;
+            --bg-secondary: #0d1117;
+            --bg-tertiary: #161b22;
+            --bg-card: #1a1f26;
+            --accent-primary: #00d9ff;
+            --accent-secondary: #7b61ff;
+            --accent-gradient: linear-gradient(135deg, #00d9ff 0%, #7b61ff 100%);
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --border-color: #30363d;
+            --success: #3fb950;
+            --warning: #d29922;
+            --code-bg: #0d1117;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* Animated background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .bg-glow-1 {
+            top: -200px;
+            right: -100px;
+            background: var(--accent-primary);
+        }
+        
+        .bg-glow-2 {
+            bottom: -200px;
+            left: -100px;
+            background: var(--accent-secondary);
+        }
+        
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 14, 20, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+        
+        nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        nav a:hover {
+            color: var(--accent-primary);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+        
+        /* Hero */
+        .hero {
+            padding: 10rem 2rem 6rem;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 50%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin-top: 4rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        /* Features */
+        .features {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .section-header p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--accent-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        /* Code Demo */
+        .demo {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .code-window {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .code-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .code-dot.red { background: #ff5f56; }
+        .code-dot.yellow { background: #ffbd2e; }
+        .code-dot.green { background: #27ca40; }
+        
+        .code-title {
+            margin-left: 1rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+        
+        .code-content {
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+        
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.7;
+            margin: 0;
+        }
+        
+        .code-keyword { color: #ff7b72; }
+        .code-directive { color: #d2a8ff; }
+        .code-string { color: #a5d6ff; }
+        .code-comment { color: var(--text-muted); font-style: italic; }
+        .code-register { color: #7ee787; }
+        .code-number { color: #79c0ff; }
+        .code-label { color: #ffa657; }
+        
+        /* Templates */
+        .templates {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .template-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .template-card:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-tertiary);
+        }
+        
+        .template-card.active {
+            border-color: var(--accent-primary);
+            background: rgba(0, 217, 255, 0.1);
+        }
+        
+        .template-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .template-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .template-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        /* CTA */
+        .cta {
+            padding: 6rem 2rem;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+        }
+        
+        .cta-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-inner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-gradient);
+        }
+        
+        .cta h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cta p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-primary);
+        }
+        
+        /* Analytics Dashboard (hidden by default) */
+        .analytics-panel {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            z-index: 100;
+            display: none;
+        }
+        
+        .analytics-panel.visible {
+            display: block;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-inner {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav {
+                gap: 1rem;
+            }
+            
+            .hero {
+                padding-top: 12rem;
+            }
+            
+            .stats {
+                gap: 2rem;
+            }
+            
+            .cta-inner {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    
+    <header>
+        <div class="header-inner">
+            <a href="#" class="logo">
+                <div class="logo-icon">M64</div>
+                MASM64
+            </a>
+            <nav>
+                <a href="#features">Features</a>
+                <a href="#demo">Demo</a>
+                <a href="#templates">Templates</a>
+                <a href="https://github.com/ludoplex/masm64-framework" target="_blank">GitHub</a>
+                <a href="https://github.com/ludoplex/masm64-framework/issues" class="btn btn-secondary">Report Issue</a>
+            </nav>
+        </div>
+    </header>
+    
+    <main>
+        <section class="hero">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Open Source & Production Ready
+            </div>
+            <h1>Modern x64 Assembly Development</h1>
+            <p>A comprehensive MASM64 framework that eliminates the steep learning curve of Windows x64 assembly. Production-ready libraries, templates, and tooling.</p>
+            <div class="hero-buttons">
+                <a href="https://github.com/ludoplex/masm64-framework" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    View on GitHub
+                </a>
+                <a href="https://github.com/ludoplex/masm64-framework/archive/refs/heads/main.zip" class="btn btn-secondary">Download ZIP</a>
+            </div>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="stat-libs">12+</div>
+                    <div class="stat-label">Libraries</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="stat-templates">5</div>
+                    <div class="stat-label">Templates</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="stat-macros">50+</div>
+                    <div class="stat-label">Macros</div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="features" class="features">
+            <div class="section-header">
+                <h2>Everything You Need</h2>
+                <p>Battle-tested components for professional x64 assembly development</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F3AF;</div>
+                    <h3>ABI Compliance</h3>
+                    <p>Correct x64 calling conventions, shadow space, and stack alignment enforced via macros.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F4DA;</div>
+                    <h3>Rich Libraries</h3>
+                    <p>Registry, filesystem, services, COM, UAC elevation, memory management and more.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x26A1;</div>
+                    <h3>Arena Allocator</h3>
+                    <p>O(1) bump allocation with scope support for high-performance memory patterns.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F6E1;</div>
+                    <h3>Assertions</h3>
+                    <p>Debug and release assertions, preconditions, postconditions with contract programming.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F500;</div>
+                    <h3>Branchless Ops</h3>
+                    <p>Constant-time min/max/clamp/select for security-critical and performance code.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F9EA;</div>
+                    <h3>Unit Testing</h3>
+                    <p>Built-in test framework with rich assertions and CI/CD integration.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="demo" class="demo">
+            <div class="demo-container">
+                <div class="section-header">
+                    <h2>Clean, Readable Assembly</h2>
+                    <p>The framework's macros make x64 assembly approachable</p>
+                </div>
+                
+                <div class="code-window">
+                    <div class="code-header">
+                        <span class="code-dot red"></span>
+                        <span class="code-dot yellow"></span>
+                        <span class="code-dot green"></span>
+                        <span class="code-title">main.asm</span>
+                    </div>
+                    <div class="code-content">
+<pre><span class="code-comment">; Simple MASM64 Framework Example</span>
+<span class="code-directive">INCLUDE</span> core\abi64.inc
+<span class="code-directive">INCLUDE</span> core\stack64.inc
+<span class="code-directive">INCLUDE</span> lib\arena64\arena64.inc
+
+<span class="code-directive">.DATA</span>
+<span class="code-label">szHello</span>    <span class="code-keyword">DB</span> <span class="code-string">"Hello from MASM64!"</span>, <span class="code-number">0</span>
+
+<span class="code-directive">.CODE</span>
+<span class="code-label">main</span> <span class="code-keyword">PROC</span> <span class="code-keyword">FRAME</span>
+    <span class="code-comment">; Prologue with proper stack alignment</span>
+    <span class="code-keyword">PROLOGUE</span> <span class="code-number">0</span>, <span class="code-number">64</span>
+    
+    <span class="code-comment">; Create arena allocator (1MB)</span>
+    <span class="code-keyword">mov</span> <span class="code-register">rcx</span>, <span class="code-number">1024 * 1024</span>
+    <span class="code-keyword">mov</span> <span class="code-register">rdx</span>, <span class="code-number">64 * 1024</span>
+    <span class="code-keyword">mov</span> <span class="code-register">r8d</span>, ARENA_GROW_COMMIT
+    <span class="code-keyword">call</span> Arena_Create
+    <span class="code-keyword">ASSERT_RAX</span>                  <span class="code-comment">; Verify allocation</span>
+    
+    <span class="code-comment">; Print message</span>
+    <span class="code-keyword">PRINT_STRING</span> szHello
+    
+    <span class="code-comment">; Epilogue and exit</span>
+    <span class="code-keyword">EPILOGUE</span>
+    <span class="code-keyword">EXIT_PROCESS</span> <span class="code-number">0</span>
+<span class="code-label">main</span> <span class="code-keyword">ENDP</span>
+<span class="code-keyword">END</span></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="templates" class="templates">
+            <div class="section-header">
+                <h2>Project Templates</h2>
+                <p>Start with a solid foundation for any project type</p>
+            </div>
+            
+            <div class="template-grid">
+                <div class="template-card active" data-template="console">
+                    <div class="template-icon">&#x1F4BB;</div>
+                    <div class="template-name">Console</div>
+                    <div class="template-desc">Command-line applications</div>
+                </div>
+                <div class="template-card" data-template="gui">
+                    <div class="template-icon">&#x1F5BC;</div>
+                    <div class="template-name">GUI</div>
+                    <div class="template-desc">Win32 windowed apps</div>
+                </div>
+                <div class="template-card" data-template="dll">
+                    <div class="template-icon">&#x1F4E6;</div>
+                    <div class="template-name">DLL</div>
+                    <div class="template-desc">Dynamic libraries</div>
+                </div>
+                <div class="template-card" data-template="driver">
+                    <div class="template-icon">&#x2699;</div>
+                    <div class="template-name">Driver</div>
+                    <div class="template-desc">Kernel-mode drivers</div>
+                </div>
+                <div class="template-card" data-template="shellcode">
+                    <div class="template-icon">&#x1F510;</div>
+                    <div class="template-name">Shellcode</div>
+                    <div class="template-desc">Position-independent code</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="cta">
+            <div class="cta-inner">
+                <h2>Ready to Build?</h2>
+                <p>Join the community of developers building with MASM64 Framework. Contributions welcome!</p>
+                <div class="cta-buttons">
+                    <a href="https://github.com/ludoplex/masm64-framework" class="btn btn-primary">Get Started</a>
+                    <a href="https://github.com/ludoplex/masm64-framework/issues/new" class="btn btn-secondary">Submit Issue</a>
+                    <a href="https://github.com/ludoplex/masm64-framework/fork" class="btn btn-secondary">Fork Project</a>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="footer-links">
+            <a href="https://github.com/ludoplex/masm64-framework">GitHub</a>
+            <a href="https://github.com/ludoplex/masm64-framework/issues">Issues</a>
+            <a href="https://github.com/ludoplex/masm64-framework/pulls">Pull Requests</a>
+            <a href="https://github.com/ludoplex/masm64-framework/discussions">Discussions</a>
+            <a href="https://github.com/ludoplex/masm64-framework/blob/main/LICENSE">License</a>
+        </div>
+        <p>MIT License. Built with Puter.js for analytics.</p>
+    </footer>
+    
+    <div id="analytics-panel" class="analytics-panel">
+        <strong>Session Analytics</strong><br>
+        Visit ID: <span id="visit-id">--</span><br>
+        Time on page: <span id="time-on-page">0s</span>
+    </div>
+
+    <script>
+        // MASM64 Framework Landing Page with Puter.js Analytics
+        (async function() {
+            'use strict';
+            
+            // Analytics state
+            const analytics = {
+                visitId: crypto.randomUUID(),
+                startTime: Date.now(),
+                events: [],
+                scrollDepth: 0,
+                clicks: 0
+            };
+            
+            // Track page view
+            function trackEvent(eventName, data = {}) {
+                const event = {
+                    event: eventName,
+                    timestamp: Date.now(),
+                    visitId: analytics.visitId,
+                    url: window.location.href,
+                    referrer: document.referrer,
+                    userAgent: navigator.userAgent,
+                    screenWidth: window.innerWidth,
+                    screenHeight: window.innerHeight,
+                    ...data
+                };
+                analytics.events.push(event);
+                
+                // Store in Puter KV if authenticated
+                storeAnalytics(event);
+            }
+            
+            // Store analytics using Puter.js
+            async function storeAnalytics(event) {
+                try {
+                    if (typeof puter !== 'undefined' && puter.kv) {
+                        const key = `masm64_analytics_${analytics.visitId}_${Date.now()}`;
+                        await puter.kv.set(key, JSON.stringify(event));
+                    }
+                } catch (e) {
+                    // Silent fail - analytics should not break the page
+                    console.debug('Analytics store:', e.message);
+                }
+            }
+            
+            // Track scroll depth
+            let maxScrollDepth = 0;
+            window.addEventListener('scroll', () => {
+                const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = Math.round((window.scrollY / scrollHeight) * 100);
+                if (scrollPercent > maxScrollDepth) {
+                    maxScrollDepth = scrollPercent;
+                    if (maxScrollDepth % 25 === 0) {
+                        trackEvent('scroll_milestone', { depth: maxScrollDepth });
+                    }
+                }
+            });
+            
+            // Track clicks on key elements
+            document.addEventListener('click', (e) => {
+                const target = e.target.closest('a, button, .template-card');
+                if (target) {
+                    analytics.clicks++;
+                    const data = {
+                        element: target.tagName,
+                        text: target.textContent?.substring(0, 50),
+                        href: target.href || null,
+                        className: target.className
+                    };
+                    trackEvent('click', data);
+                }
+            });
+            
+            // Template card interaction
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    trackEvent('template_selected', { template: card.dataset.template });
+                });
+            });
+            
+            // Track time on page
+            function updateTimeOnPage() {
+                const seconds = Math.floor((Date.now() - analytics.startTime) / 1000);
+                const el = document.getElementById('time-on-page');
+                if (el) {
+                    if (seconds < 60) {
+                        el.textContent = `${seconds}s`;
+                    } else {
+                        el.textContent = `${Math.floor(seconds/60)}m ${seconds%60}s`;
+                    }
+                }
+            }
+            setInterval(updateTimeOnPage, 1000);
+            
+            // Show visit ID
+            document.getElementById('visit-id').textContent = analytics.visitId.substring(0, 8);
+            
+            // Track page view on load
+            trackEvent('page_view', {
+                title: document.title,
+                path: window.location.pathname
+            });
+            
+            // Track session end
+            window.addEventListener('beforeunload', () => {
+                trackEvent('session_end', {
+                    duration: Date.now() - analytics.startTime,
+                    maxScrollDepth: maxScrollDepth,
+                    totalClicks: analytics.clicks
+                });
+                
+                // Attempt to send final beacon
+                if (navigator.sendBeacon) {
+                    const data = JSON.stringify({
+                        visitId: analytics.visitId,
+                        events: analytics.events,
+                        summary: {
+                            duration: Date.now() - analytics.startTime,
+                            maxScrollDepth,
+                            clicks: analytics.clicks
+                        }
+                    });
+                    // Could send to a backend endpoint
+                }
+            });
+            
+            // Smooth scroll for nav links
+            document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', (e) => {
+                    const href = anchor.getAttribute('href');
+                    if (href.startsWith('#')) {
+                        e.preventDefault();
+                        const target = document.querySelector(href);
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                });
+            });
+            
+            // Admin analytics view (press 'A' three times)
+            let keyPresses = [];
+            document.addEventListener('keydown', (e) => {
+                if (e.key.toLowerCase() === 'a') {
+                    keyPresses.push(Date.now());
+                    keyPresses = keyPresses.filter(t => Date.now() - t < 1000);
+                    if (keyPresses.length >= 3) {
+                        document.getElementById('analytics-panel').classList.toggle('visible');
+                        keyPresses = [];
+                    }
+                }
+            });
+            
+            console.log('%cMASM64 Framework', 'font-size: 24px; font-weight: bold; color: #00d9ff;');
+            console.log('%cVisit: ' + analytics.visitId, 'color: #7b61ff;');
+        })();
+    </script>
+</body>
+</html>
+
