@@ -29,12 +29,14 @@ STD_ERROR_HANDLE  EQU -12
 ; Parameters: str_label - Label of null-terminated string
 ; Clobbers: RAX, RCX, RDX, R8, R9, R10, R11 (volatile registers only)
 ; Preserves: All non-volatile registers
-; Note: Assumes shadow space is already allocated by calling function
+; Note: Requires shadow space allocated by calling function (e.g., via PROLOGUE).
+;       Uses the allocated shadow space for temporary storage and call parameters.
 ;-----------------------------------------------------------------------------
 PRINT_STRING MACRO str_label
     LOCAL str_len, print_done
     
-    mov [rsp + 8], rdi                  ; Save non-volatile RDI to shadow space
+    ;; Save non-volatile RDI using our allocated shadow space
+    mov [rsp + 8], rdi                  ; [RSP+8] is within our allocated space
     
     ;; Get string length
     lea rdi, str_label
@@ -55,11 +57,12 @@ PRINT_STRING MACRO str_label
     ;; WriteConsoleA(hConsole, lpBuffer, nNumberOfCharsToWrite, lpNumberWritten, lpReserved)
     lea rdx, str_label                  ; lpBuffer
     ;; R8 already has length
-    lea r9, [rsp + 10h]                 ; lpNumberOfCharsWritten (use shadow space)
+    lea r9, [rsp + 10h]                 ; lpNumberOfCharsWritten (our shadow space)
     mov QWORD PTR [rsp + 20h], 0        ; lpReserved (5th parameter at RSP+32)
     call WriteConsoleA
     
-    mov rdi, [rsp + 8]                  ; Restore non-volatile RDI
+    ;; Restore non-volatile RDI
+    mov rdi, [rsp + 8]
 ENDM
 
 ;-----------------------------------------------------------------------------

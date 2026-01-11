@@ -93,12 +93,8 @@ EPILOGUE MACRO local_space:=<0>
     ENDIF
     
     ;; Saved RBP is at [RBP + (total_alloc - SHADOW_SPACE)]
-    IF total_alloc EQ SHADOW_SPACE
-        lea rsp, [rbp]                       ; Saved RBP is at RBP
-    ELSE
-        lea rsp, [rbp + total_alloc - SHADOW_SPACE]   ; Point RSP to saved RBP
-    ENDIF
-    pop rbp                                  ; Restore RBP and adjust RSP
+    lea rsp, [rbp + total_alloc - SHADOW_SPACE]   ; Point RSP to saved RBP
+    pop rbp                                        ; Restore RBP and adjust RSP
 ENDM
 
 ;-----------------------------------------------------------------------------
