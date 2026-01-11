@@ -52,12 +52,11 @@ jobs:
         echo "clones_count=$CLONES_COUNT" >> $GITHUB_OUTPUT
         echo "clones_unique=$CLONES_UNIQUE" >> $GITHUB_OUTPUT
         
-        # Get top referrers
+        # Get top referrers (as single line, comma-separated)
         REFERRERS=$(gh api repos/${{ github.repository }}/traffic/popular/referrers 2>/dev/null || echo '[]')
-        TOP_REFERRERS=$(echo "$REFERRERS" | jq -r '.[0:5] | .[] | "  - \(.referrer): \(.count) views (\(.uniques) unique)"' 2>/dev/null || echo "  No referrer data available")
-        echo "top_referrers<<EOF" >> $GITHUB_OUTPUT
-        echo "$TOP_REFERRERS" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+        TOP_REFERRERS=$(echo "$REFERRERS" | jq -r '.[0:5] | map("\(.referrer): \(.count)") | join(", ")' 2>/dev/null || echo "No data")
+        if [ -z "$TOP_REFERRERS" ]; then TOP_REFERRERS="No referrer data"; fi
+        echo "top_referrers=$TOP_REFERRERS" >> $GITHUB_OUTPUT
         
         # Get recent commits count (last 7 days)
         WEEK_AGO=$(date -d '7 days ago' '+%Y-%m-%dT%H:%M:%SZ')
@@ -144,9 +143,7 @@ jobs:
               
               <div class="section">
                 <h3>Top Referrers</h3>
-                <pre style="background: #f6f8fa; padding: 15px; border-radius: 6px; overflow-x: auto;">
-        ${{ steps.stats.outputs.top_referrers }}
-                </pre>
+                <p style="background: #f6f8fa; padding: 15px; border-radius: 6px;">${{ steps.stats.outputs.top_referrers }}</p>
               </div>
               
               <p style="text-align: center; margin-top: 30px;">
