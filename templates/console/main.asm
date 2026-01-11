@@ -40,7 +40,7 @@ main PROC FRAME
     PRINT_STRING szHello
     
     ; Exit with success
-    EPILOGUE
+    EPILOGUE 32                              ; Must match PROLOGUE local_space
     EXIT_PROCESS 0
 main ENDP
 

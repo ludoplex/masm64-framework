@@ -49,12 +49,13 @@ PROLOGUE MACRO num_saved_regs:=<0>, local_space:=<0>
     
     ;; Calculate total stack allocation
     ;; Need: shadow(32) + locals + padding for 16-byte alignment
-    ;; After push rbp, RSP is 8 mod 16. We need it 0 mod 16 before calls.
-    ;; push rbp used 8 bytes, so we need to allocate 8 + 32 + locals (rounded up)
+    ;; After CALL, RSP is 8 mod 16. After push rbp, RSP is 0 mod 16.
+    ;; We need RSP to be 0 mod 16 (16-byte aligned) before making calls.
+    ;; Therefore, total_alloc must be a multiple of 16.
     
     total_alloc = SHADOW_SPACE + local_space
-    IF (total_alloc MOD 16) NE 8
-        total_alloc = total_alloc + 8
+    IF (total_alloc MOD 16) NE 0
+        total_alloc = total_alloc + (16 - (total_alloc MOD 16))
     ENDIF
     
     sub rsp, total_alloc
@@ -69,9 +70,34 @@ ENDM
 ; EPILOGUE - Tear down stack frame
 ;-----------------------------------------------------------------------------
 ; Restores RBP and RSP to their original values.
+;
+; Parameters:
+;   local_space - MUST match the local_space parameter passed to PROLOGUE
+;
+; IMPORTANT: Due to the PROLOGUE design (lea rbp, [rsp + SHADOW_SPACE]),
+; the EPILOGUE must know the local_space value to correctly calculate where
+; the saved RBP is located. This value MUST match what was passed to PROLOGUE.
+;
+; Example:
+;   PROLOGUE 0, 32
+;   ...
+;   EPILOGUE 32
 ;-----------------------------------------------------------------------------
-EPILOGUE MACRO
-    lea rsp, [rbp - SHADOW_SPACE]           ; Point RSP to saved RBP
+EPILOGUE MACRO local_space:=<0>
+    LOCAL total_alloc
+    
+    ;; Calculate same total_alloc as PROLOGUE
+    total_alloc = SHADOW_SPACE + local_space
+    IF (total_alloc MOD 16) NE 0
+        total_alloc = total_alloc + (16 - (total_alloc MOD 16))
+    ENDIF
+    
+    ;; Saved RBP is at [RBP + (total_alloc - SHADOW_SPACE)]
+    IF total_alloc EQ SHADOW_SPACE
+        lea rsp, [rbp]                       ; Saved RBP is at RBP
+    ELSE
+        lea rsp, [rbp + total_alloc - SHADOW_SPACE]   ; Point RSP to saved RBP
+    ENDIF
     pop rbp                                  ; Restore RBP and adjust RSP
 ENDM
 
