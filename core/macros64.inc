@@ -58,7 +58,7 @@ PRINT_STRING MACRO str_label
     lea rdx, str_label                  ; lpBuffer
     ;; R8 already has length
     lea r9, [rsp + 10h]                 ; lpNumberOfCharsWritten (our shadow space)
-    mov QWORD PTR [rsp + 20h], 0        ; lpReserved (5th parameter at RSP+32)
+    mov QWORD PTR [rsp + 20h], 0        ; lpReserved (5th parameter at RSP+0x20)
     call WriteConsoleA
     
     ;; Restore non-volatile RDI
