@@ -3,15 +3,24 @@
 ;-----------------------------------------------------------------------------
 ; Provides macros for proper x64 stack frame setup and teardown.
 ;
-; Stack Layout After PROLOGUE:
-;   [rbp + 28h] = 5th argument (if any)
-;   [rbp + 20h] = R9 home (shadow space)
-;   [rbp + 18h] = R8 home (shadow space)
-;   [rbp + 10h] = RDX home (shadow space)
-;   [rbp + 08h] = RCX home (shadow space)
-;   [rbp + 00h] = Return address
-;   [rbp - 08h] = Saved RBP
-;   [rbp - xxh] = Local variables
+; Stack Layout After PROLOGUE (with PROLOGUE 0, local_space):
+;   After 'push rbp', 'sub rsp, total_alloc', 'lea rbp, [rsp + SHADOW_SPACE]':
+;
+;   Higher addresses (arguments from caller)
+;   [rbp + total_alloc + 16] = 5th argument (if any)
+;   [rbp + total_alloc + 8]  = R9 home (shadow space from caller)
+;   [rbp + total_alloc]      = R8 home (shadow space from caller)
+;   [rbp + total_alloc - 8]  = RDX home (shadow space from caller)
+;   [rbp + total_alloc - 16] = RCX home (shadow space from caller)
+;   [rbp + total_alloc - 24] = Return address
+;   [rbp + total_alloc - 32] = Saved RBP
+;   [rbp]                    = Start of our shadow space for calls we make
+;   [rbp - SHADOW_SPACE]     = RSP (points to local variable space)
+;   Lower addresses (local variables)
+;
+;   Note: total_alloc = SHADOW_SPACE + local_space, aligned to maintain
+;         16-byte alignment before calls. Access to arguments requires
+;         knowing total_alloc, so direct register access is recommended.
 ;-----------------------------------------------------------------------------
 
 IFNDEF STACK64_INC
@@ -62,15 +71,21 @@ ENDM
 ; Restores RBP and RSP to their original values.
 ;-----------------------------------------------------------------------------
 EPILOGUE MACRO
-    lea rsp, [rbp - SHADOW_SPACE + SHADOW_SPACE]
-    add rsp, 8                              ; Account for frame difference
-    pop rbp
+    lea rsp, [rbp - SHADOW_SPACE]           ; Point RSP to saved RBP
+    pop rbp                                  ; Restore RBP and adjust RSP
 ENDM
 
 ;-----------------------------------------------------------------------------
 ; SAVE_NONVOL - Save non-volatile registers
 ;-----------------------------------------------------------------------------
 ; Use at start of function after PROLOGUE to save registers you'll modify.
+;
+; IMPORTANT: This macro saves registers to stack locations below shadow space.
+; You MUST ensure sufficient local_space is allocated in PROLOGUE to accommodate
+; all saved registers. Each register requires 8 bytes.
+;
+; Example: If saving 3 registers (RBX, RDI, RSI), allocate at least 24 bytes
+; in PROLOGUE's local_space parameter: PROLOGUE 0, 24
 ;-----------------------------------------------------------------------------
 SAVE_NONVOL MACRO regs:VARARG
     LOCAL offset
@@ -85,6 +100,7 @@ ENDM
 ; RESTORE_NONVOL - Restore non-volatile registers
 ;-----------------------------------------------------------------------------
 ; Use at end of function before EPILOGUE to restore saved registers.
+; Must specify registers in the SAME ORDER as SAVE_NONVOL.
 ;-----------------------------------------------------------------------------
 RESTORE_NONVOL MACRO regs:VARARG
     LOCAL offset

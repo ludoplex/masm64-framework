@@ -65,23 +65,21 @@ ENDM
 ;-----------------------------------------------------------------------------
 ; ARG - Access function arguments
 ;-----------------------------------------------------------------------------
-; In x64, first 4 args are in registers but may be saved to shadow space.
-; Use after PROLOGUE to access arguments by index.
+; DEPRECATED: This macro has incorrect offsets due to the PROLOGUE design.
+; The offsets depend on the total_alloc value which varies per function.
 ;
-; Note: This assumes args were saved to shadow space in prologue.
+; RECOMMENDED APPROACH:
+;   For register arguments (1-4): Access registers directly (RCX, RDX, R8, R9)
+;   before they are clobbered, or save them explicitly if needed.
+;   For stack arguments (5+): Access via [RSP + offset] before PROLOGUE,
+;   or save to local variables in PROLOGUE.
+;
+; Note: Due to PROLOGUE setting RBP = RSP + SHADOW_SPACE, argument locations
+; relative to RBP vary based on local_space allocation and cannot be
+; determined by this macro alone.
 ;-----------------------------------------------------------------------------
 ARG MACRO n
-    IF n EQ 1
-        EXITM <QWORD PTR [rbp + 10h]>       ;; RCX home
-    ELSEIF n EQ 2
-        EXITM <QWORD PTR [rbp + 18h]>       ;; RDX home
-    ELSEIF n EQ 3
-        EXITM <QWORD PTR [rbp + 20h]>       ;; R8 home
-    ELSEIF n EQ 4
-        EXITM <QWORD PTR [rbp + 28h]>       ;; R9 home
-    ELSE
-        EXITM <QWORD PTR [rbp + (n * 8) + 8]>  ;; Stack args
-    ENDIF
+    .ERR <ARG macro is deprecated - use direct register/stack access instead>
 ENDM
 
 ;-----------------------------------------------------------------------------
