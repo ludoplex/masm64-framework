@@ -23,6 +23,14 @@ The Cosmopolitan ecosystem already provides powerful scaffolding and codegen too
 - **Copier/Cookiecutter** - Work with cosmocc for template-based generation
 - **cosmocc toolchain** - Already handles cross-OS/arch compilation
 
+### Additional Ecosystem Capabilities
+
+- **[Cosmopolitan CPython](https://github.com/jart/cosmopolitan)** - Python 3.x compiled with cosmocc, enabling portable Copier/Cookiecutter execution
+- **[cosmo SQLite](https://github.com/nicholatian/sqlite-cosmo)** - Embedded database as APE
+- **[redbean](https://redbean.dev)** - Single-file web server with Lua, SQLite, serves 1M+ req/sec
+- **[Microwindows/Nano-X](https://github.com/nicholatian/microwindows)** - Cross-platform GUI framework
+- **htmx.js** - Hypermedia-driven frontend for redbean web apps
+
 ### Gap Analysis
 
 1. **Fragmented tooling** - These tools exist but aren't unified into a single coherent framework with consistent conventions
@@ -30,6 +38,7 @@ The Cosmopolitan ecosystem already provides powerful scaffolding and codegen too
 3. **Assertion coverage inconsistent** - No enforced assertion density or structured precondition/postcondition patterns across projects
 4. **LLM codegen lacks C-specific guardrails** - AI-generated C code needs validation frameworks, memory safety checks, and convention enforcement
 5. **No lifecycle management** - Existing templates are one-shot; Copier's update capability is underutilized for evolving portable C projects
+6. **Web/GUI templates missing** - redbean + htmx.js + SQLite stack lacks project scaffolding with best practices
 
 ### Target Users
 
@@ -64,14 +73,30 @@ The Cosmopolitan ecosystem already provides powerful scaffolding and codegen too
 
 ---
 
-## 3. Upstream Dependencies
+## 3. Upstream Dependencies & ludoplex Forks
 
-### Primary
+### Existing ludoplex Cosmopolitan Forks (Sync Required)
 
-| Repository | Purpose | Sync Strategy |
-|------------|---------|---------------|
-| [jart/cosmopolitan](https://github.com/jart/cosmopolitan) | Core libc, cosmocc toolchain | Fork to ludoplex, track releases |
-| [shmup/awesome-cosmopolitan](https://github.com/shmup/awesome-cosmopolitan) | Resource aggregation | Watch, no fork needed |
+| ludoplex Fork | Upstream | Purpose | Sync Status |
+|---------------|----------|---------|-------------|
+| [ludoplex/superconfigure](https://github.com/ludoplex/superconfigure) | ahgamut/superconfigure | Autotools wrapper for Cosmopolitan builds | **SYNC NEEDED** |
+| [ludoplex/cosmo-gcc-plugin](https://github.com/ludoplex/cosmo-gcc-plugin) | ahgamut/cosmo-gcc-plugin | GCC plugin for porting C to Cosmopolitan | **SYNC NEEDED** |
+| [ludoplex/cosmo-cross-sdk](https://github.com/ludoplex/cosmo-cross-sdk) | Ronsor/cosmo-cross-sdk | Cross-compiling SDK for Cosmopolitan | **SYNC NEEDED** |
+| [ludoplex/rust-ape-example](https://github.com/ludoplex/rust-ape-example) | ahgamut/rust-ape-example | Rust + Cosmopolitan APE examples (175+ programs) | **SYNC NEEDED** |
+| [ludoplex/cosmosocks](https://github.com/ludoplex/cosmosocks) | bannsec/cosmosocks | SOCKS4/5 server in Cosmopolitan libc | **SYNC NEEDED** |
+| [ludoplex/redbean-template](https://github.com/ludoplex/redbean-template) | nicholatian/redbean-template | Redbean project scaffold | **SYNC NEEDED** |
+| [ludoplex/redbean-cardgames](https://github.com/ludoplex/redbean-cardgames) | (upstream) | Card games collection in redbean | **SYNC NEEDED** |
+| [ludoplex/ludofile](https://github.com/ludoplex/ludofile) | trailofbits/polyfile | Polyfile with Cosmopolitan APE support | **SYNC NEEDED** |
+| [ludoplex/diffoscope-with-Python3.11.0rc1-and-Cosmopolitan](https://github.com/ludoplex/diffoscope-with-Python3.11.0rc1-and-Cosmopolitan) | diffoscope | Diffoscope with Cosmopolitan Python | **SYNC NEEDED** |
+| [ludoplex/cookiecutter](https://github.com/ludoplex/cookiecutter) | cookiecutter/cookiecutter | Project templating (for cosmo python) | **SYNC NEEDED** |
+| [ludoplex/awesome-cosmo](https://github.com/ludoplex/awesome-cosmo) | burggraf/awesome-cosmo | Curated Cosmopolitan apps (redbean, SQLite, Python, etc.) | **SYNC NEEDED** |
+
+### Primary Upstream (Not Yet Forked)
+
+| Repository | Purpose | Action Required |
+|------------|---------|-----------------|
+| [jart/cosmopolitan](https://github.com/jart/cosmopolitan) | Core libc, cosmocc, CPython | **FORK NEEDED** |
+| [shmup/awesome-cosmopolitan](https://github.com/shmup/awesome-cosmopolitan) | Resource aggregation | Watch only |
 | [matt-dunleavy/cosmo-project](https://github.com/matt-dunleavy/cosmo-project) | Build system reference | Reference only |
 
 ### Scaffolding Tools
@@ -79,7 +104,7 @@ The Cosmopolitan ecosystem already provides powerful scaffolding and codegen too
 | Tool | Role | Selection Rationale |
 |------|------|---------------------|
 | [Copier](https://copier.readthedocs.io/) | Primary templating | Lifecycle management, YAML config, template updates |
-| [Cookiecutter](https://cookiecutter.readthedocs.io/) | Legacy/fallback | Broader ecosystem, simpler for one-shot generation |
+| [ludoplex/cookiecutter](https://github.com/ludoplex/cookiecutter) | Fallback (runs on cosmo python) | Broader ecosystem, portable via Cosmopolitan CPython |
 | [gperf](https://www.gnu.org/software/gperf/) | Perfect hash generation | Compile-time hash table codegen |
 | [m4](https://www.gnu.org/software/m4/) | Macro preprocessing | Complex conditional generation |
 
@@ -89,6 +114,22 @@ The Cosmopolitan ecosystem already provides powerful scaffolding and codegen too
 |------|------|
 | Claude Code / Claude API | Spec-to-code generation with validation loop |
 | Local LLM (Ollama) | Offline generation fallback |
+
+### Sync Procedure
+
+```bash
+# For each ludoplex fork, sync with upstream:
+cd /path/to/ludoplex/<repo>
+git remote add upstream https://github.com/<upstream-owner>/<repo>.git
+git fetch upstream
+git checkout main
+git merge upstream/main --no-edit
+git push origin main
+
+# Tag compatible versions for cosmo-scaffold
+git tag -a cosmo-scaffold-compat-v1 -m "Compatible with cosmo-scaffold v1.0"
+git push origin --tags
+```
 
 ---
 
@@ -121,10 +162,16 @@ cosmo-scaffold/
 │   └── test/                   # Testing framework
 ├── templates/                  # Project type templates
 │   ├── cli/                    # Command-line application
-│   ├── server/                 # Network server
+│   ├── server/                 # Network server (TCP/UDP)
+│   ├── web/                    # Web app (redbean + SQLite + htmx.js)
+│   ├── gui/                    # Desktop GUI (Microwindows/Nano-X)
 │   ├── embedded/               # Embedded/bare-metal
 │   ├── library/                # Shared library (.so/.dll/.dylib)
 │   └── wasm/                   # WebAssembly target
+├── tools/                      # Portable tooling (cosmo python)
+│   ├── python.com              # Cosmopolitan CPython (portable)
+│   ├── copier/                 # Copier installed in cosmo python
+│   └── cookiecutter/           # Cookiecutter as fallback
 ├── codegen/                    # Code generation tools
 │   ├── gperf/                  # Perfect hash generators
 │   ├── prompts/                # LLM prompt templates
@@ -245,7 +292,202 @@ if (kw) {
 
 ---
 
-## 6. Scaffolding Workflow
+## 6. Web Application Stack (redbean + SQLite + htmx.js)
+
+### 6.1 Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    redbean.com (APE)                     │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │  Lua Application Layer                              │ │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌───────────────┐  │ │
+│  │  │  Routes     │ │  Handlers   │ │  Middleware   │  │ │
+│  │  └─────────────┘ └─────────────┘ └───────────────┘  │ │
+│  └─────────────────────────────────────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │  Embedded Assets (/zip/)                            │ │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌───────────────┐  │ │
+│  │  │  htmx.js    │ │  CSS        │ │  Templates    │  │ │
+│  │  └─────────────┘ └─────────────┘ └───────────────┘  │ │
+│  └─────────────────────────────────────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │  SQLite Database (embedded or external)             │ │
+│  └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 6.2 Web Template Structure
+
+```
+templates/web/
+├── .init.lua                   # Application entry point
+├── routes/
+│   ├── index.lua               # GET / handler
+│   ├── api/                    # JSON API endpoints
+│   └── pages/                  # HTML page handlers
+├── static/
+│   ├── htmx.min.js             # htmx.js (hypermedia)
+│   ├── style.css               # Minimal CSS
+│   └── favicon.ico
+├── templates/
+│   ├── base.html               # Base layout
+│   ├── partials/               # htmx partial responses
+│   └── pages/                  # Full page templates
+├── db/
+│   ├── schema.sql              # SQLite schema
+│   └── migrations/             # Schema migrations
+├── Makefile                    # Build redbean bundle
+└── test/
+    └── api_test.lua            # API tests
+```
+
+### 6.3 htmx.js Patterns
+
+```html
+<!-- Hypermedia-driven UI - no JavaScript SPA needed -->
+<button hx-post="/api/items"
+        hx-target="#item-list"
+        hx-swap="beforeend">
+  Add Item
+</button>
+
+<div id="item-list" hx-get="/api/items" hx-trigger="load">
+  <!-- Items loaded via htmx -->
+</div>
+```
+
+### 6.4 SQLite Integration
+
+```lua
+-- .init.lua
+local sqlite = require 'lsqlite3'
+local db = sqlite.open('/zip/data.db')  -- Embedded in APE
+
+-- Or external for persistence
+local db = sqlite.open('app.db')
+
+-- Prepared statements for safety
+local stmt = db:prepare('SELECT * FROM items WHERE id = ?')
+stmt:bind(1, item_id)
+for row in stmt:nrows() do
+  -- Process row with assertions
+  assert(row.id ~= nil, "item must have id")
+end
+```
+
+---
+
+## 7. GUI Application Stack (Microwindows/Nano-X)
+
+### 7.1 Cross-Platform GUI Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              Application (APE binary)                    │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │  GUI Layer (cosmo_gui.h)                            │ │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌───────────────┐  │ │
+│  │  │  Windows    │ │  Widgets    │ │  Events       │  │ │
+│  │  └─────────────┘ └─────────────┘ └───────────────┘  │ │
+│  └─────────────────────────────────────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │  Microwindows/Nano-X                                │ │
+│  │  (Compiled into APE or dynamically linked)          │ │
+│  └─────────────────────────────────────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │  Platform Backends                                  │ │
+│  │  Linux(X11/FB) | Windows(GDI) | macOS(Quartz)      │ │
+│  └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 7.2 GUI Template Structure
+
+```
+templates/gui/
+├── src/
+│   ├── main.c                  # Entry point with GUI init
+│   ├── window.c                # Main window
+│   ├── widgets/                # Custom widgets
+│   └── handlers/               # Event handlers
+├── resources/
+│   ├── icons/                  # Application icons
+│   ├── fonts/                  # Embedded fonts
+│   └── themes/                 # UI themes
+├── include/
+│   └── app_gui.h               # Application GUI header
+├── Makefile
+└── test/
+    └── gui_test.c              # GUI component tests
+```
+
+### 7.3 GUI Assertions
+
+```c
+// cosmo_gui.h patterns
+COSMO_ASSERT_WINDOW_VALID(window);
+COSMO_ASSERT_WIDGET_ATTACHED(widget, parent);
+COSMO_ASSERT_EVENT_HANDLED(event);
+COSMO_ASSERT_RENDER_CONTEXT(ctx);
+```
+
+---
+
+## 8. Self-Hosting Toolchain (Cosmopolitan CPython)
+
+### 8.1 Portable Scaffolding
+
+The scaffolding tools themselves are portable APEs:
+
+```bash
+# Download once, run anywhere
+curl -O https://cosmo.zip/pub/cosmos/bin/python3.11.com
+chmod +x python3.11.com
+
+# Install Copier portably
+./python3.11.com -m pip install copier --target=./copier_pkg
+
+# Run Copier as portable command
+./python3.11.com -m copier copy gh:ludoplex/cosmo-scaffold ./myproject
+```
+
+### 8.2 Bundled Tools Distribution
+
+```
+cosmo-scaffold-tools.zip (APE archive)
+├── python.com                  # Cosmopolitan Python 3.11
+├── copier/                     # Copier package
+├── cookiecutter/               # Cookiecutter package
+├── jinja2/                     # Template engine
+├── pyyaml/                     # YAML parser
+└── scaffold.py                 # Wrapper script
+
+# Single command from any OS:
+./python.com scaffold.py new myproject --template=web
+```
+
+### 8.3 Module Generation
+
+```bash
+# Generate a new module in existing project
+./python.com scaffold.py add-module \
+  --name=auth \
+  --type=service \
+  --with-tests \
+  --with-arena
+
+# Generates:
+# src/auth/
+# ├── auth.c
+# ├── auth.h
+# ├── auth_arena.c      # Arena-backed allocations
+# └── auth_test.c       # With assertion coverage
+```
+
+---
+
+## 9. Scaffolding Workflow
 
 ### 6.1 Copier-Based Generation (Primary)
 

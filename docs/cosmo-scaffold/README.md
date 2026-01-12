@@ -36,20 +36,34 @@ The Product Requirements Document defining the vision, architecture, and impleme
 
 ## Upstream Repositories
 
-### To Fork (ludoplex)
+### Existing ludoplex Cosmo Forks (11 repos - sync needed)
 
-| Upstream | Purpose | Status |
-|----------|---------|--------|
-| [jart/cosmopolitan](https://github.com/jart/cosmopolitan) | Core libc + cosmocc | **Not yet forked** |
+| Fork | Upstream | Purpose |
+|------|----------|---------|
+| [superconfigure](https://github.com/ludoplex/superconfigure) | ahgamut | Autotools wrapper for Cosmopolitan |
+| [cosmo-gcc-plugin](https://github.com/ludoplex/cosmo-gcc-plugin) | ahgamut | GCC plugin for Cosmopolitan porting |
+| [cosmo-cross-sdk](https://github.com/ludoplex/cosmo-cross-sdk) | Ronsor | Cross-compiling SDK |
+| [rust-ape-example](https://github.com/ludoplex/rust-ape-example) | ahgamut | Rust + Cosmopolitan (175+ examples) |
+| [cosmosocks](https://github.com/ludoplex/cosmosocks) | bannsec | SOCKS4/5 server |
+| [redbean-template](https://github.com/ludoplex/redbean-template) | nicholatian | Redbean project scaffold |
+| [redbean-cardgames](https://github.com/ludoplex/redbean-cardgames) | - | Card games in redbean |
+| [ludofile](https://github.com/ludoplex/ludofile) | trailofbits/polyfile | Polyfile with APE support |
+| [diffoscope-with-Cosmopolitan](https://github.com/ludoplex/diffoscope-with-Python3.11.0rc1-and-Cosmopolitan) | diffoscope | Diffoscope + cosmo Python |
+| [cookiecutter](https://github.com/ludoplex/cookiecutter) | cookiecutter | Templating (for cosmo python) |
+| [awesome-cosmo](https://github.com/ludoplex/awesome-cosmo) | burggraf | Curated cosmo apps list |
 
-### Reference Only (No Fork Needed)
+### To Fork (Not Yet in ludoplex)
+
+| Upstream | Purpose |
+|----------|---------|
+| [jart/cosmopolitan](https://github.com/jart/cosmopolitan) | Core libc + cosmocc + CPython |
+
+### Reference Only
 
 | Repository | Purpose |
 |------------|---------|
 | [shmup/awesome-cosmopolitan](https://github.com/shmup/awesome-cosmopolitan) | Resource list |
 | [matt-dunleavy/cosmo-project](https://github.com/matt-dunleavy/cosmo-project) | Build system reference |
-| [TimonLukas/action-static-redbean](https://github.com/TimonLukas/action-static-redbean) | CI/CD patterns |
-| [Welding-Torch/superconfigure](https://github.com/Welding-Torch/superconfigure) | Autoconf patterns |
 
 ## Quick Reference
 
