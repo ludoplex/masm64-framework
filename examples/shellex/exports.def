@@ -1,0 +1,14 @@
+; ShellEx - Copy Path Shell Extension
+; Export definitions
+
+LIBRARY shellex
+
+EXPORTS
+    DllMain             PRIVATE
+    DllGetClassObject   PRIVATE
+    DllCanUnloadNow     PRIVATE
+    DllRegisterServer   PRIVATE
+    DllUnregisterServer PRIVATE
+    TestCopyPath
+    TestCopyUnixPath
+
