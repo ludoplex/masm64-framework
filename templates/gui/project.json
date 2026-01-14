@@ -1,0 +1,28 @@
+{
+    "name": "{{PROJECT_NAME}}",
+    "type": "gui",
+    "version": "1.0.0",
+    "description": "Win32 GUI application",
+    "author": "{{AUTHOR}}",
+    "created": "{{DATE}}",
+    "framework": {
+        "version": "1.0.0",
+        "path": "..\\..\\masm64-framework"
+    },
+    "build": {
+        "assembler": "uasm64",
+        "linker": "link",
+        "subsystem": "WINDOWS",
+        "entry": "WinMain",
+        "sources": ["main.asm"],
+        "resources": ["res\\resources.rc"],
+        "includes": ["core", "lib"],
+        "libraries": ["kernel32.lib", "user32.lib", "gdi32.lib", "comctl32.lib"],
+        "output": "bin\\{{PROJECT_NAME}}.exe"
+    },
+    "debug": {
+        "symbols": true,
+        "debugger": "windbg"
+    }
+}
+

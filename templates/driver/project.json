@@ -1,0 +1,35 @@
+{
+    "name": "{{PROJECT_NAME}}",
+    "type": "driver",
+    "version": "1.0.0",
+    "description": "Windows Kernel Mode Driver",
+    "author": "{{AUTHOR}}",
+    "created": "{{DATE}}",
+    "framework": {
+        "version": "1.0.0",
+        "path": "..\\..\\masm64-framework"
+    },
+    "build": {
+        "assembler": "uasm64",
+        "linker": "link",
+        "subsystem": "NATIVE",
+        "entry": "DriverEntry",
+        "sources": ["main.asm"],
+        "includes": ["wdk\\km"],
+        "libraries": ["ntoskrnl.lib", "hal.lib"],
+        "output": "bin\\{{PROJECT_NAME}}.sys"
+    },
+    "signing": {
+        "required": true,
+        "testSign": true
+    },
+    "debug": {
+        "symbols": true,
+        "debugger": "windbg"
+    },
+    "warnings": [
+        "Test drivers only in virtual machines",
+        "Production drivers require WHQL signing"
+    ]
+}
+

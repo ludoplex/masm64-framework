@@ -1,0 +1,80 @@
+$$ MASM64 Crash Analysis Script
+$$ Usage: In WinDbg, run: $$>a< analyze-crash.wds
+
+$$ =============================================================================
+$$ Analyze crash dump and provide MASM64-specific insights
+$$ =============================================================================
+
+.printf "\n======================================\n"
+.printf "MASM64 Crash Analysis Report\n"
+.printf "======================================\n\n"
+
+$$ Basic crash analysis
+!analyze -v
+
+.printf "\n======================================\n"
+.printf "MASM64 Specific Analysis\n"
+.printf "======================================\n\n"
+
+$$ Check stack alignment at crash
+.printf "=== Stack Alignment Check ===\n"
+.if ((@rsp & 0xf) == 0) 
+{ 
+    .printf "RSP (0x%p) is 16-byte aligned - OK\n\n", @rsp 
+} 
+.else 
+{ 
+    .printf "WARNING: RSP (0x%p) is NOT 16-byte aligned!\n", @rsp
+    .printf "This is a common cause of crashes in x64 code.\n"
+    .printf "Check that your prologue correctly aligns the stack.\n\n"
+}
+
+$$ Display shadow space (might contain clues)
+.printf "=== Shadow Space (at crash point) ===\n"
+dq @rsp L4
+.printf "\n"
+
+$$ Check for common access violations
+.printf "=== Access Violation Analysis ===\n"
+.if ($vvalid(@rcx, 1) == 0)
+{
+    .printf "RCX (0x%p) points to invalid memory - possible NULL pointer dereference\n", @rcx
+}
+.if ($vvalid(@rdx, 1) == 0)
+{
+    .printf "RDX (0x%p) points to invalid memory\n", @rdx
+}
+.if ($vvalid(@r8, 1) == 0)
+{
+    .printf "R8  (0x%p) points to invalid memory\n", @r8
+}
+.if ($vvalid(@r9, 1) == 0)
+{
+    .printf "R9  (0x%p) points to invalid memory\n", @r9
+}
+
+$$ Check return address validity
+.printf "\n=== Return Address Check ===\n"
+dq @rsp L1
+.printf "Return address: "
+dps @rsp L1
+
+$$ Stack trace
+.printf "\n=== Stack Trace ===\n"
+k 20
+
+$$ Disassembly around crash point
+.printf "\n=== Disassembly at RIP ===\n"
+ub @rip L8
+u @rip L8
+
+.printf "\n======================================\n"
+.printf "Analysis complete.\n"
+.printf "Common MASM64 issues to check:\n"
+.printf "1. Stack alignment (RSP mod 16 must be 0)\n"
+.printf "2. Shadow space allocation (32 bytes minimum)\n"
+.printf "3. Non-volatile register preservation\n"
+.printf "4. NULL pointer checks\n"
+.printf "5. Buffer overflows\n"
+.printf "======================================\n"
+

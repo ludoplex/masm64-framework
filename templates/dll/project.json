@@ -1,0 +1,30 @@
+{
+    "name": "{{PROJECT_NAME}}",
+    "type": "dll",
+    "version": "1.0.0",
+    "description": "Dynamic Link Library",
+    "author": "{{AUTHOR}}",
+    "created": "{{DATE}}",
+    "framework": {
+        "version": "1.0.0",
+        "path": "..\\..\\masm64-framework"
+    },
+    "build": {
+        "assembler": "uasm64",
+        "linker": "link",
+        "entry": "DllMain",
+        "sources": ["main.asm"],
+        "exports": "exports.def",
+        "includes": ["core", "lib"],
+        "libraries": ["kernel32.lib"],
+        "output": {
+            "dll": "bin\\{{PROJECT_NAME}}.dll",
+            "lib": "bin\\{{PROJECT_NAME}}.lib"
+        }
+    },
+    "debug": {
+        "symbols": true,
+        "debugger": "windbg"
+    }
+}
+

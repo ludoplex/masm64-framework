@@ -1,0 +1,27 @@
+{
+    "name": "{{PROJECT_NAME}}",
+    "type": "console",
+    "version": "1.0.0",
+    "description": "Console application",
+    "author": "{{AUTHOR}}",
+    "created": "{{DATE}}",
+    "framework": {
+        "version": "1.0.0",
+        "path": "..\\..\\masm64-framework"
+    },
+    "build": {
+        "assembler": "uasm64",
+        "linker": "link",
+        "subsystem": "CONSOLE",
+        "entry": "WinMain",
+        "sources": ["main.asm"],
+        "includes": ["core", "lib"],
+        "libraries": ["kernel32.lib", "user32.lib"],
+        "output": "bin\\{{PROJECT_NAME}}.exe"
+    },
+    "debug": {
+        "symbols": true,
+        "debugger": "windbg"
+    }
+}
+

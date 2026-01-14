@@ -1,0 +1,39 @@
+{
+    "name": "{{PROJECT_NAME}}",
+    "type": "shellcode",
+    "version": "1.0.0",
+    "description": "Position-independent shellcode",
+    "author": "{{AUTHOR}}",
+    "created": "{{DATE}}",
+    "framework": {
+        "version": "1.0.0",
+        "path": "..\\..\\masm64-framework"
+    },
+    "build": {
+        "assembler": "uasm64",
+        "linker": "link",
+        "entry": "ShellcodeEntry",
+        "sources": ["main.asm"],
+        "libraries": [],
+        "flags": {
+            "nodefaultlib": true,
+            "fixed": true,
+            "base": "0",
+            "merge_sections": true
+        },
+        "output": {
+            "exe": "bin\\{{PROJECT_NAME}}.exe",
+            "bin": "bin\\{{PROJECT_NAME}}.bin"
+        }
+    },
+    "features": {
+        "position_independent": true,
+        "no_imports": true,
+        "self_resolving": true
+    },
+    "warnings": [
+        "For authorized security research only",
+        "Test in isolated environments"
+    ]
+}
+

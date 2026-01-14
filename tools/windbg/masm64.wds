@@ -1,0 +1,58 @@
+$$ MASM64 Framework WinDbg Script
+$$ Load this with: .load masm64.wds
+
+$$ =============================================================================
+$$ Useful commands for debugging MASM64 applications
+$$ =============================================================================
+
+$$ Display register state in friendly format
+.block
+{
+    $$ Define alias for register dump
+    as /c masm64_regs ".printf \"=== MASM64 Register State ===\\n\"; r rax, rbx, rcx, rdx, rsi, rdi, rbp, rsp, r8, r9, r10, r11, r12, r13, r14, r15; .printf \"\\n=== Flags ===\\n\"; r efl"
+}
+
+$$ Check stack alignment
+.block
+{
+    as /c masm64_stackcheck ".printf \"RSP = 0x%p\\n\", @rsp; .if ((@rsp & 0xf) == 0) { .printf \"Stack is 16-byte aligned (OK)\\n\" } .else { .printf \"WARNING: Stack is NOT 16-byte aligned!\\n\" }"
+}
+
+$$ Display shadow space
+.block
+{
+    as /c masm64_shadow ".printf \"=== Shadow Space (Home Area) ===\\n\"; dq @rsp L4"
+}
+
+$$ Display current function arguments (assumes standard calling convention)
+.block
+{
+    as /c masm64_args ".printf \"=== Function Arguments ===\\nRCX (arg1): 0x%p\\nRDX (arg2): 0x%p\\nR8  (arg3): 0x%p\\nR9  (arg4): 0x%p\\n\", @rcx, @rdx, @r8, @r9"
+}
+
+$$ Display non-volatile registers (should be preserved across calls)
+.block
+{
+    as /c masm64_nonvol ".printf \"=== Non-volatile Registers ===\\nRBX: 0x%p\\nRBP: 0x%p\\nRDI: 0x%p\\nRSI: 0x%p\\nR12: 0x%p\\nR13: 0x%p\\nR14: 0x%p\\nR15: 0x%p\\n\", @rbx, @rbp, @rdi, @rsi, @r12, @r13, @r14, @r15"
+}
+
+$$ Trace function calls with shadow space validation
+.block
+{
+    as /c masm64_trace "wt -oR"
+}
+
+$$ Break on common Win32 API functions
+.block
+{
+    as /c masm64_bpapi "bp kernel32!CreateFileW; bp kernel32!ReadFile; bp kernel32!WriteFile; bp kernel32!CloseHandle; bp kernel32!GetLastError; bp user32!MessageBoxW"
+}
+
+$$ Display help for MASM64 debugging commands
+.block
+{
+    as /c masm64_help ".printf \"=== MASM64 WinDbg Commands ===\\n\"; .printf \"masm64_regs      - Display all general-purpose registers\\n\"; .printf \"masm64_stackcheck - Check 16-byte stack alignment\\n\"; .printf \"masm64_shadow    - Display shadow space contents\\n\"; .printf \"masm64_args      - Display function arguments (RCX, RDX, R8, R9)\\n\"; .printf \"masm64_nonvol    - Display non-volatile registers\\n\"; .printf \"masm64_trace     - Trace function calls\\n\"; .printf \"masm64_bpapi     - Set breakpoints on common Win32 APIs\\n\""
+}
+
+.printf "MASM64 WinDbg extensions loaded. Type 'masm64_help' for commands.\n"
+

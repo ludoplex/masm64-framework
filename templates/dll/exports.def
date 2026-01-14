@@ -1,0 +1,6 @@
+; {{PROJECT_NAME}} Export Definitions
+LIBRARY {{PROJECT_NAME}}
+EXPORTS
+    ExampleFunction
+    GetVersion
+

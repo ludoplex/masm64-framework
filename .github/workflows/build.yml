@@ -1,0 +1,136 @@
+# MASM64 Framework CI/CD Pipeline
+# Builds and tests the framework on Windows
+
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  UASM_VERSION: "2.56.2"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        config: [debug, release]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Visual Studio Build Tools
+      uses: microsoft/setup-msbuild@v2
+    
+    - name: Download UASM
+      shell: pwsh
+      run: |
+        # Download UASM assembler
+        $uasmUrl = "https://github.com/AsmProjects/uasm/releases/download/v${{ env.UASM_VERSION }}/uasm-${{ env.UASM_VERSION }}-windows-x64.zip"
+        Invoke-WebRequest -Uri $uasmUrl -OutFile uasm.zip -ErrorAction SilentlyContinue
+        if (Test-Path uasm.zip) {
+            Expand-Archive -Path uasm.zip -DestinationPath tools\uasm
+            Write-Host "UASM downloaded successfully"
+        } else {
+            Write-Host "::warning::Could not download UASM, using ml64"
+        }
+    
+    - name: Setup environment
+      shell: cmd
+      run: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        echo PATH=%PATH%;%CD%\tools\uasm >> %GITHUB_ENV%
+    
+    - name: Build hello test
+      shell: cmd
+      working-directory: tests/hello
+      run: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        set PATH=%PATH%;%CD%\..\..\tools\uasm
+        call build.bat
+    
+    - name: Build framework tests
+      shell: cmd
+      working-directory: tests/framework
+      run: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        set PATH=%PATH%;%CD%\..\..\tools\uasm
+        call build.bat
+    
+    - name: Run tests
+      shell: cmd
+      working-directory: tests/framework
+      run: |
+        bin\run-tests.exe
+        echo Test exit code: %ERRORLEVEL%
+        if %ERRORLEVEL% NEQ 0 exit /b 1
+    
+    - name: Build console template
+      shell: cmd
+      working-directory: templates/console
+      run: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        set PATH=%PATH%;%CD%\..\..\tools\uasm
+        call build.bat
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: masm64-framework-${{ matrix.config }}
+        path: |
+          templates/*/bin/*.exe
+          tests/*/bin/*.exe
+        retention-days: 7
+
+  test-templates:
+    runs-on: windows-latest
+    needs: build
+    
+    strategy:
+      matrix:
+        template: [console, gui, dll]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Visual Studio Build Tools
+      uses: microsoft/setup-msbuild@v2
+    
+    - name: Test ${{ matrix.template }} template
+      shell: cmd
+      run: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        cd tools
+        call new-project.bat TestProject ${{ matrix.template }} %TEMP%
+        cd %TEMP%\TestProject
+        call build.bat
+
+  documentation:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Generate documentation index
+      run: |
+        echo "# MASM64 Framework Documentation" > docs/index.md
+        echo "" >> docs/index.md
+        echo "## Quick Links" >> docs/index.md
+        echo "- [Quick Start](QUICKSTART.md)" >> docs/index.md
+        echo "- [ABI Reference](ABI-REFERENCE.md)" >> docs/index.md
+        echo "" >> docs/index.md
+        echo "## Libraries" >> docs/index.md
+        for dir in lib/*/; do
+          name=$(basename $dir)
+          echo "- [$name](../lib/$name/)" >> docs/index.md
+        done
+
