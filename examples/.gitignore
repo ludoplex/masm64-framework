@@ -1,0 +1,12 @@
+# Build outputs
+*/bin/
+*/obj/
+
+# Debug files
+*.pdb
+*.ilk
+
+# Object files
+*.obj
+*.o
+

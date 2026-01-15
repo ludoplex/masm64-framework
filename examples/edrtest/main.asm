@@ -20,14 +20,14 @@ OPTION CASEMAP:NONE
 ;-----------------------------------------------------------------------------
 
 ;-----------------------------------------------------------------------------
-; Hash constants (djb2 algorithm)
+; Hash constants (djb2 algorithm, truncated to 32-bit)
 ;-----------------------------------------------------------------------------
 HASH_KERNEL32           EQU 06A4ABC5Bh
 HASH_NTDLL              EQU 01EDAB0EDh
 HASH_USER32             EQU 063C84283h
 
 HASH_LOADLIBRARYA       EQU 0EC0E4E8Eh
-HASH_GETPROCADDRESS     EQU 07C0DFCAA0h
+HASH_GETPROCADDRESS     EQU 07C0DFCAAh      ; Truncated to 32-bit
 HASH_MESSAGEBOXW        EQU 0BC4DA2A8h
 
 ;-----------------------------------------------------------------------------

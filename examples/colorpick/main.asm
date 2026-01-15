@@ -204,11 +204,12 @@ PAINTSTRUCT ENDS
 ;-----------------------------------------------------------------------------
 .DATA
 
-WSTR wszClassName, "ColorPickClass"
-WSTR wszWindowTitle, "ColorPick"
-WSTR wszTip, "ColorPick - Ctrl+Shift+C to pick"
-WSTR wszExit, "Exit"
-WSTR wszAbout, "About"
+; Wide strings defined manually (MASM limitation)
+wszClassName    DW 'C','o','l','o','r','P','i','c','k','C','l','a','s','s', 0
+wszWindowTitle  DW 'C','o','l','o','r','P','i','c','k', 0
+wszTip          DW 'C','o','l','o','r','P','i','c','k',' ','-',' ','C','t','r','l','+','S','h','i','f','t','+','C',' ','t','o',' ','p','i','c','k', 0
+wszExit         DW 'E','x','i','t', 0
+wszAbout        DW 'A','b','o','u','t', 0
 
 szHexFormat     DB "#%02X%02X%02X", 0
 szClipFormat    DB "#000000", 0, 0

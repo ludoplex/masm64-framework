@@ -83,10 +83,10 @@ g_cLock             DWORD 0                 ; Server lock count
 ; Stored file path from Initialize
 g_szFilePath        WORD MAX_PATH DUP(0)
 
-; Menu strings
-WSTR wszCopyPath, "Copy Path"
-WSTR wszCopyUnixPath, "Copy Unix Path"
-WSTR wszCopyFolder, "Copy Folder Path"
+; Menu strings (wide strings defined manually)
+wszCopyPath     DW 'C','o','p','y',' ','P','a','t','h', 0
+wszCopyUnixPath DW 'C','o','p','y',' ','U','n','i','x',' ','P','a','t','h', 0
+wszCopyFolder   DW 'C','o','p','y',' ','F','o','l','d','e','r',' ','P','a','t','h', 0
 
 ; Help strings
 szHelpCopyPath      DB "Copy full file path to clipboard", 0
