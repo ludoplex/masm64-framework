@@ -225,10 +225,11 @@ DispatchPassThrough ENDP
 ; DispatchDeviceControl - Handle IOCTLs for configuration
 ;-----------------------------------------------------------------------------
 DispatchDeviceControl PROC FRAME
-    LOCAL pExt:QWORD
-    LOCAL pIrp:QWORD
-    LOCAL pStack:QWORD
-    LOCAL dwCode:DWORD
+    ; Stack layout (rbp-relative):
+    ;   [rbp+0]  = pExt (QWORD)
+    ;   [rbp+8]  = pIrp (QWORD)
+    ;   [rbp+16] = pStack (QWORD)
+    ;   [rbp+24] = dwCode (DWORD)
     
     push rbp
     .pushreg rbp
@@ -241,21 +242,21 @@ DispatchDeviceControl PROC FRAME
     .endprolog
     
     mov rbx, rcx                        ; DeviceObject
-    mov pIrp, rdx
+    mov [rbp+8], rdx                    ; pIrp = rdx
     
     ; Get device extension
     mov rax, [rbx + 40]
-    mov pExt, rax
+    mov [rbp+0], rax                    ; pExt = rax
     
     ; Get IRP stack location
     mov rcx, rdx
     call IoGetCurrentIrpStackLocation
-    mov pStack, rax
+    mov [rbp+16], rax                   ; pStack = rax
     
     ; Get IOCTL code from stack (offset varies by Windows version)
     ; Parameters.DeviceIoControl.IoControlCode
     mov eax, [rax + 24]                 ; Approximate offset
-    mov dwCode, eax
+    mov [rbp+24], eax                   ; dwCode = eax
     
     cmp eax, IOCTL_RAWMOUSE_GET_CONFIG
     je get_config
@@ -268,7 +269,7 @@ DispatchDeviceControl PROC FRAME
     
     ; Pass unknown IOCTLs to lower driver
     mov rcx, rbx
-    mov rdx, pIrp
+    mov rdx, [rbp+8]                    ; pIrp
     call DispatchPassThrough
     jmp done
     
@@ -290,7 +291,7 @@ get_stats:
 complete:
     ; Complete the IRP
     ; Set IoStatus.Status and IoStatus.Information
-    mov rcx, pIrp
+    mov rcx, [rbp+8]                    ; pIrp
     mov [rcx + 24], eax                 ; IoStatus.Status (approx offset)
     mov QWORD PTR [rcx + 32], 0         ; IoStatus.Information
     xor edx, edx                        ; IO_NO_INCREMENT
@@ -368,13 +369,16 @@ DispatchPnp ENDP
 ; Called by PnP manager when a mouse device is found
 ;-----------------------------------------------------------------------------
 AddDevice PROC FRAME
-    LOCAL pDeviceObject:QWORD
-    LOCAL pExt:QWORD
+    ; Stack layout (rbp-relative):
+    ;   [rbp+0]  = pDeviceObject (QWORD)
+    ;   [rbp+8]  = pExt (QWORD)
     
     push rbp
     .pushreg rbp
     push rbx
     .pushreg rbx
+    push r12
+    .pushreg r12
     sub rsp, 88
     .allocstack 88
     lea rbp, [rsp + 32]
@@ -382,7 +386,7 @@ AddDevice PROC FRAME
     .endprolog
     
     mov rbx, rcx                        ; DriverObject
-    ; rdx = PhysicalDeviceObject
+    mov r12, rdx                        ; PhysicalDeviceObject (save for later)
     
     ; Debug output
     lea rcx, szAddDevice
@@ -395,16 +399,16 @@ AddDevice PROC FRAME
     mov r9d, 0Fh                        ; FILE_DEVICE_MOUSE
     mov DWORD PTR [rsp + 32], 0         ; DeviceCharacteristics
     mov DWORD PTR [rsp + 40], 0         ; Exclusive = FALSE
-    lea rax, pDeviceObject
+    lea rax, [rbp+0]                    ; &pDeviceObject
     mov [rsp + 48], rax
     call IoCreateDevice
     test eax, eax
     jnz failed
     
     ; Get and initialize extension
-    mov rax, pDeviceObject
+    mov rax, [rbp+0]                    ; pDeviceObject
     mov rax, [rax + 40]                 ; DeviceExtension
-    mov pExt, rax
+    mov [rbp+8], rax                    ; pExt = rax
     
     ; Zero extension
     mov rcx, rax
@@ -413,38 +417,38 @@ AddDevice PROC FRAME
     call RtlZeroMemory
     
     ; Set default config
-    mov rax, pExt
+    mov rax, [rbp+8]                    ; pExt
     mov DWORD PTR [rax].DEVICE_EXTENSION.bEnabled, 1
     mov DWORD PTR [rax].DEVICE_EXTENSION.dwSensitivity, 100
     
     ; Attach to device stack
     ; IoAttachDeviceToDeviceStack returns lower device
-    mov rcx, pDeviceObject
-    ; rdx still has PDO from parameter
+    mov rcx, [rbp+0]                    ; pDeviceObject
+    mov rdx, r12                        ; PhysicalDeviceObject
     call IoAttachDeviceToDeviceStack
     test rax, rax
     jz cleanup_device
     
-    mov rcx, pExt
+    mov rcx, [rbp+8]                    ; pExt
     mov [rcx].DEVICE_EXTENSION.pLowerDevice, rax
     
     ; Set device flags to match lower device
-    mov rax, pDeviceObject
-    mov rcx, pExt
+    mov rax, [rbp+0]                    ; pDeviceObject
+    mov rcx, [rbp+8]                    ; pExt
     mov rcx, [rcx].DEVICE_EXTENSION.pLowerDevice
     mov ecx, [rcx + 28]                 ; Flags
     and ecx, 3                          ; DO_BUFFERED_IO | DO_DIRECT_IO
     or [rax + 28], ecx
     
     ; Clear initializing flag
-    mov rax, pDeviceObject
+    mov rax, [rbp+0]                    ; pDeviceObject
     and DWORD PTR [rax + 28], NOT 80h   ; ~DO_DEVICE_INITIALIZING
     
     xor eax, eax                        ; STATUS_SUCCESS
     jmp done
     
 cleanup_device:
-    mov rcx, pDeviceObject
+    mov rcx, [rbp+0]                    ; pDeviceObject
     call IoDeleteDevice
     
 failed:
@@ -452,6 +456,7 @@ failed:
     
 done:
     add rsp, 88
+    pop r12
     pop rbx
     pop rbp
     ret
