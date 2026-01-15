@@ -6,9 +6,6 @@ REM DLL Build Script
 REM -----------------------------------------------------------------------------
 
 set PROJECT_NAME=MyLib
-set ASM=ml64.exe
-set LINK=link.exe
-set LIBS=kernel32.lib
 
 if not exist obj mkdir obj
 if not exist bin mkdir bin
@@ -16,13 +13,15 @@ if not exist bin mkdir bin
 echo Building %PROJECT_NAME%...
 
 echo   Assembling...
-%ASM% /c /nologo /Zi /Fo obj\main.obj main.asm
+ml64 /c /nologo /Zi /Fo obj\main.obj main.asm
 if errorlevel 1 goto :error
 
 echo   Linking DLL...
-%LINK% /nologo /DLL /ENTRY:DllMain /DEF:exports.def /DEBUG ^
-    /OUT:bin\%PROJECT_NAME%.dll /IMPLIB:bin\%PROJECT_NAME%.lib ^
-    obj\main.obj %LIBS%
+link /nologo /DLL /ENTRY:DllMain /DEF:exports.def /DEBUG ^
+    /OUT:bin\%PROJECT_NAME%.dll ^
+    /IMPLIB:bin\%PROJECT_NAME%.lib ^
+    obj\main.obj ^
+    kernel32.lib
 if errorlevel 1 goto :error
 
 echo.
