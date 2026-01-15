@@ -3,7 +3,8 @@
 ;-----------------------------------------------------------------------------
 ; MASM64 Framework - Console Application
 ;
-; To customize: Edit config.inc
+; To customize: Edit config.inc for project settings
+;               Edit string definitions below in .DATA section
 ;-----------------------------------------------------------------------------
 
 OPTION CASEMAP:NONE
@@ -37,8 +38,12 @@ STD_OUTPUT_HANDLE       EQU -11
 ;-----------------------------------------------------------------------------
 .DATA
 
-; Invoke the string definition macro from config.inc
-DEFINE_STRINGS
+; Application strings - edit these for your project
+wszAppMessage   DW 'H','e','l','l','o',' ','f','r','o','m',' '
+                DW 'M','A','S','M','6','4','!',0
+MSG_LENGTH      EQU 17
+
+wszNewLine      DW 13, 10, 0
 
 ;-----------------------------------------------------------------------------
 ; BSS Section
@@ -73,7 +78,7 @@ WinMain PROC FRAME
     ; Write message
     mov rcx, rax                        ; hConsoleOutput
     lea rdx, wszAppMessage              ; lpBuffer
-    mov r8d, 28                         ; nNumberOfCharsToWrite
+    mov r8d, MSG_LENGTH                 ; nNumberOfCharsToWrite
     lea r9, dwWritten                   ; lpNumberOfCharsWritten
     mov QWORD PTR [rsp + 32], 0         ; lpReserved
     call WriteConsoleW

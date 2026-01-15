@@ -1,8 +1,7 @@
 ;-----------------------------------------------------------------------------
-; config.inc - Project Configuration
+; config.inc - DLL Project Configuration
 ;-----------------------------------------------------------------------------
 ; Edit this file to customize your DLL project.
-; This is the only file you need to modify for basic customization.
 ;-----------------------------------------------------------------------------
 
 ;-----------------------------------------------------------------------------
@@ -14,6 +13,4 @@ PROJECT_VERSION     EQU 00010000h           ; 1.0.0.0
 ;-----------------------------------------------------------------------------
 ; DLL Configuration
 ;-----------------------------------------------------------------------------
-; Set to 1 to disable thread attach/detach notifications (recommended)
-DISABLE_THREAD_CALLS    EQU 1
-
+DISABLE_THREAD_CALLS    EQU 1               ; Set to 1 to disable thread notifications

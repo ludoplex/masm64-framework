@@ -93,8 +93,9 @@ MSG ENDS
 ;-----------------------------------------------------------------------------
 .DATA
 
-; Invoke string definitions from config.inc
-DEFINE_STRINGS
+; Window class and title - edit these for your project
+wszClassName    DW 'M','A','S','M','6','4','W','i','n','d','o','w',0
+wszWindowTitle  DW 'M','y','A','p','p',' ','-',' ','M','A','S','M','6','4',0
 
 hInstance   QWORD 0
 hMainWnd    QWORD 0

@@ -14,13 +14,8 @@ PROJECT_VERSION     EQU 00010000h           ; 1.0.0.0
 ;-----------------------------------------------------------------------------
 ; String Resources
 ;-----------------------------------------------------------------------------
-; MASM cannot substitute text equates into string literals, so define
-; your project-specific strings here. These will be included in .DATA
+; Define your project-specific strings here.
+; These are included directly in the .DATA section.
+;
+; Note: Change the message text and length (r8d value in main.asm) as needed
 ;-----------------------------------------------------------------------------
-
-; Main output message - customize as needed
-DEFINE_STRINGS MACRO
-    wszAppMessage   DW "Hello from MASM64 Framework!", 0
-    wszNewLine      DW 13, 10, 0
-ENDM
-

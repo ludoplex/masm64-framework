@@ -55,8 +55,11 @@ EXTERNDEF RtlInitUnicodeString:PROC
 ;-----------------------------------------------------------------------------
 .DATA
 
-; Invoke string definitions from config.inc
-DEFINE_STRINGS
+; Device name and symbolic link - edit these for your driver
+szDeviceName    DB "\Device\MyDriver", 0
+szSymLink       DB "\DosDevices\MyDriver", 0
+szLoadMsg       DB "MyDriver: Driver loaded", 10, 0
+szUnloadMsg     DB "MyDriver: Driver unloaded", 10, 0
 
 g_pDeviceObject QWORD 0
 
