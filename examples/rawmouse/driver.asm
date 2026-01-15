@@ -102,9 +102,8 @@ EXTERNDEF IoAttachDeviceToDeviceStack:PROC
 EXTERNDEF IoDetachDevice:PROC
 EXTERNDEF IoCallDriver:PROC
 EXTERNDEF IofCompleteRequest:PROC
-EXTERNDEF IoSkipCurrentIrpStackLocation:PROC
-EXTERNDEF IoCopyCurrentIrpStackLocationToNext:PROC
-EXTERNDEF IoGetCurrentIrpStackLocation:PROC
+; Note: IoSkipCurrentIrpStackLocation and IoGetCurrentIrpStackLocation are
+; inline macros in WDK, implemented locally below
 EXTERNDEF ExAllocatePoolWithTag:PROC
 EXTERNDEF ExFreePoolWithTag:PROC
 EXTERNDEF RtlCopyMemory:PROC
@@ -128,6 +127,37 @@ POOL_TAG        EQU 'sMwR'
 ; Code Section
 ;-----------------------------------------------------------------------------
 .CODE
+
+;-----------------------------------------------------------------------------
+; IoGetCurrentIrpStackLocation - Inline implementation
+;-----------------------------------------------------------------------------
+; RCX = pointer to IRP
+; Returns: pointer to current IO_STACK_LOCATION in RAX
+;
+; IRP structure offsets (approximate, Windows version dependent):
+;   +0x40 = Tail.Overlay.CurrentStackLocation
+;-----------------------------------------------------------------------------
+IoGetCurrentIrpStackLocation PROC
+    mov rax, [rcx + 40h]                ; Irp->Tail.Overlay.CurrentStackLocation
+    ret
+IoGetCurrentIrpStackLocation ENDP
+
+;-----------------------------------------------------------------------------
+; IoSkipCurrentIrpStackLocation - Inline implementation
+;-----------------------------------------------------------------------------
+; RCX = pointer to IRP
+; Increments CurrentLocation and CurrentStackLocation pointer
+;
+; IRP structure offsets (approximate):
+;   +0x04 = CurrentLocation (CHAR)
+;   +0x40 = Tail.Overlay.CurrentStackLocation
+;   sizeof(IO_STACK_LOCATION) = 72 bytes (0x48)
+;-----------------------------------------------------------------------------
+IoSkipCurrentIrpStackLocation PROC
+    inc BYTE PTR [rcx + 4]              ; Irp->CurrentLocation++
+    add QWORD PTR [rcx + 40h], 48h      ; CurrentStackLocation += sizeof(IO_STACK_LOCATION)
+    ret
+IoSkipCurrentIrpStackLocation ENDP
 
 ;-----------------------------------------------------------------------------
 ; ProcessMouseData - Apply raw input processing to mouse data
