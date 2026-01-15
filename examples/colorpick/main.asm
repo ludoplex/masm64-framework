@@ -14,9 +14,9 @@ OPTION CASEMAP:NONE
 ;-----------------------------------------------------------------------------
 ; Includes
 ;-----------------------------------------------------------------------------
-INCLUDE \masm64-framework\core\abi64.inc
-INCLUDE \masm64-framework\core\stack64.inc
-INCLUDE \masm64-framework\core\macros64.inc
+INCLUDE ..\..\core\abi64.inc
+INCLUDE ..\..\core\stack64.inc
+INCLUDE ..\..\core\macros64.inc
 
 ;-----------------------------------------------------------------------------
 ; External Win32 API

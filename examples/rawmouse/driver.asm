@@ -13,8 +13,8 @@ OPTION CASEMAP:NONE
 ;-----------------------------------------------------------------------------
 ; Includes
 ;-----------------------------------------------------------------------------
-INCLUDE \masm64-framework\core\abi64.inc
-INCLUDE \masm64-framework\core\stack64.inc
+INCLUDE ..\..\core\abi64.inc
+INCLUDE ..\..\core\stack64.inc
 
 ;-----------------------------------------------------------------------------
 ; Kernel mode constants
