@@ -10,7 +10,7 @@
         "path": "..\\..\\masm64-framework"
     },
     "build": {
-        "assembler": "uasm64",
+        "assembler": "ml64",
         "linker": "link",
         "subsystem": "NATIVE",
         "entry": "DriverEntry",

@@ -1,6 +1,6 @@
-; {{PROJECT_NAME}} Export Definitions
-LIBRARY {{PROJECT_NAME}}
+; DLL Export Definitions
+; Add your exported functions here
+LIBRARY MyLib
 EXPORTS
     ExampleFunction
     GetVersion
-

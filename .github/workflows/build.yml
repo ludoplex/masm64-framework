@@ -160,57 +160,43 @@ jobs:
         retention-days: 7
 
   #---------------------------------------------------------------------------
-  # Template validation - Verify template structure (not compilation)
-  # Templates contain placeholders like {{PROJECT_NAME}} and need processing
+  # Template compilation tests - Verify all templates compile with defaults
   #---------------------------------------------------------------------------
   test-templates:
     runs-on: windows-latest
-    name: Validate Templates
+    name: Build Template (${{ matrix.template }})
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [console, gui, dll, shellcode]
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
     
-    - name: Validate template structure
-      shell: pwsh
+    - name: Setup Visual Studio Build Tools
+      uses: microsoft/setup-msbuild@v2
+    
+    - name: Build ${{ matrix.template }} template
+      shell: cmd
+      working-directory: templates/${{ matrix.template }}
       run: |
-        $templates = @("console", "gui", "dll", "driver", "shellcode")
-        $required = @("main.asm", "build.bat", "project.json")
-        $errors = 0
-        
-        foreach ($t in $templates) {
-          $path = "templates/$t"
-          if (-not (Test-Path $path)) {
-            Write-Host "::warning::Template '$t' not found"
-            continue
-          }
-          
-          Write-Host "Validating template: $t"
-          
-          # Check for required files (main.asm or template-specific main)
-          $hasMain = (Test-Path "$path/main.asm") -or ($t -eq "driver" -and (Test-Path "$path/driver.asm")) -or ($t -eq "dll" -and (Test-Path "$path/main.asm"))
-          if (-not $hasMain) {
-            Write-Host "::error::Template '$t' missing main assembly file"
-            $errors++
-          }
-          
-          if (-not (Test-Path "$path/build.bat")) {
-            Write-Host "::error::Template '$t' missing build.bat"
-            $errors++
-          }
-          
-          if (-not (Test-Path "$path/project.json")) {
-            Write-Host "::error::Template '$t' missing project.json"
-            $errors++
-          }
-          
-          Write-Host "  OK"
-        }
-        
-        if ($errors -gt 0) {
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        call build.bat
+    
+    - name: Verify build output
+      shell: pwsh
+      working-directory: templates/${{ matrix.template }}
+      run: |
+        $outputs = Get-ChildItem -Path bin -File -ErrorAction SilentlyContinue
+        if ($outputs) {
+          Write-Host "Template build outputs:"
+          $outputs | ForEach-Object { Write-Host "  $($_.Name) - $($_.Length) bytes" }
+        } else {
+          Write-Error "No build outputs found!"
           exit 1
         }
-        Write-Host "All templates validated successfully"
 
   #---------------------------------------------------------------------------
   # Framework core tests

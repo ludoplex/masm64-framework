@@ -1,45 +1,38 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 
 REM -----------------------------------------------------------------------------
 REM GUI Application Build Script
 REM -----------------------------------------------------------------------------
 
-set PROJECT_NAME={{PROJECT_NAME}}
-set ASM_FILES=main.asm
-
-set UASM=uasm64.exe
+set PROJECT_NAME=MyApp
+set ASM=ml64.exe
 set LINK=link.exe
 set RC=rc.exe
-
-set INCPATH=/I"%~dp0..\..\core" /I"%~dp0..\..\lib"
 set LIBS=kernel32.lib user32.lib gdi32.lib comctl32.lib
 
 if not exist obj mkdir obj
 if not exist bin mkdir bin
 
+echo Building %PROJECT_NAME%...
+
 REM Compile resources if present
 if exist res\resources.rc (
-    echo Compiling resources...
-    %RC% /fo"obj\resources.res" res\resources.rc
+    echo   Compiling resources...
+    %RC% /nologo /fo obj\resources.res res\resources.rc
     if errorlevel 1 goto :error
     set RES=obj\resources.res
 ) else (
     set RES=
 )
 
-REM Assemble
-echo Assembling %PROJECT_NAME%...
-for %%f in (%ASM_FILES%) do (
-    echo   %%f
-    %UASM% /c /Cp /W2 /Zp8 /win64 %INCPATH% /Fo"obj\%%~nf.obj" "%%f"
-    if errorlevel 1 goto :error
-)
+echo   Assembling...
+%ASM% /c /nologo /Zi /Fo obj\main.obj main.asm
+if errorlevel 1 goto :error
 
-REM Link
-echo Linking...
-%LINK% /SUBSYSTEM:WINDOWS /ENTRY:WinMain /OUT:bin\%PROJECT_NAME%.exe ^
-    obj\*.obj %RES% %LIBS%
+echo   Linking...
+%LINK% /nologo /SUBSYSTEM:WINDOWS /ENTRY:WinMain /DEBUG ^
+    /OUT:bin\%PROJECT_NAME%.exe obj\main.obj %RES% %LIBS%
 if errorlevel 1 goto :error
 
 echo.
@@ -53,4 +46,3 @@ exit /b 1
 
 :end
 endlocal
-
