@@ -38,7 +38,7 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
     - name: Setup Visual Studio Build Tools
       uses: microsoft/setup-msbuild@v2
@@ -66,7 +66,7 @@ jobs:
         }
     
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: example-${{ matrix.example }}
         path: examples/${{ matrix.example }}/bin/*
@@ -81,7 +81,7 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
     - name: Setup Visual Studio Build Tools
       uses: microsoft/setup-msbuild@v2
@@ -153,7 +153,7 @@ jobs:
         }
     
     - name: Upload driver artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: example-rawmouse-driver
         path: examples/rawmouse/bin/rawmouse.sys
@@ -173,7 +173,7 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
     - name: Setup Visual Studio Build Tools
       uses: microsoft/setup-msbuild@v2
@@ -207,7 +207,7 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     
     - name: Setup Visual Studio Build Tools
       uses: microsoft/setup-msbuild@v2
